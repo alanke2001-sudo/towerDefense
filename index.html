@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>三界神煞：時空守衛 - Three Realms: Chrono Guard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;900&family=Noto+Serif+TC:wght@600;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: hidden;
+      touch-action: manipulation;
+      height: 100dvh;
+      max-height: 100dvh;
+    }
+    .font-title {
+      font-family: 'Noto Serif TC', 'Cinzel', serif;
+    }
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.5);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.8);
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .animate-pulse-slow {
+      animation: pulse-ring 3s ease-in-out infinite;
+    }
+    .glow-gold {
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.35);
+    }
+    .glow-chakra {
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Mobile Portrait Optimized Styles */
+    body.mode-mobile #main-container {
+      flex-direction: column !important;
+    }
+    body.mode-mobile #arena-section {
+      height: 44vh !important;
+      flex: none !important;
+    }
+    body.mode-mobile #control-sidebar {
+      height: calc(56vh - 48px) !important;
+      width: 100% !important;
+      border-left: none !important;
+      border-top: 1px solid rgb(30 41 59) !important;
+    }
+    /* Hide long description text in mobile mode and show compact tags instead */
+    body.mode-mobile .desc-text {
+      display: none !important;
+    }
+    body.mode-mobile .info-badge {
+      display: inline-flex !important;
+    }
+    body:not(.mode-mobile) .info-badge {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col select-none overflow-hidden">
+
+  <!-- Initial Game Start Splash / Mode Select Modal -->
+  <div id="modal-start-screen" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-7 shadow-2xl text-center relative overflow-hidden">
+      <div class="absolute -top-16 -left-16 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-16 -right-16 w-36 h-36 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="text-3xl sm:text-4xl mb-2">☯️</div>
+      <h1 class="text-xl sm:text-2xl font-black font-title tracking-wider bg-gradient-to-r from-amber-300 via-orange-400 to-red-400 bg-clip-text text-transparent">
+        三界神煞：時空守衛
+      </h1>
+      <p class="text-xs text-slate-400 mt-1 mb-5">西遊 · 三國 · 火影 輪迴放置塔防</p>
+
+      <div class="text-xs font-bold text-slate-300 mb-3 flex items-center justify-center gap-1.5">
+        <span>⚙️</span> 請選擇您的遊玩顯示配置
+      </div>
+
+      <div class="space-y-3 text-left">
+        <!-- Mobile Mode Selection -->
+        <button id="btn-select-mobile" class="w-full p-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-850 hover:from-amber-950/50 hover:to-slate-800 border-2 border-amber-500/30 hover:border-amber-400 transition transform active:scale-95 group shadow">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl p-2 bg-amber-500/10 rounded-xl">📱</span>
+              <div>
+                <div class="font-bold text-amber-300 text-sm group-hover:text-amber-200">手機直式模式</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">緊湊視窗 · 冗長文字改為長按提示 · 底部控制常駐</div>
+              </div>
+            </div>
+            <span class="text-amber-400 text-xs">選擇 ➔</span>
+          </div>
+        </button>
+
+        <!-- Tablet / Desktop Mode Selection -->
+        <button id="btn-select-tablet" class="w-full p-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-850 hover:from-indigo-950/50 hover:to-slate-800 border-2 border-slate-700 hover:border-indigo-400 transition transform active:scale-95 group shadow">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl p-2 bg-indigo-500/10 rounded-xl">💻</span>
+              <div>
+                <div class="font-bold text-indigo-300 text-sm group-hover:text-indigo-200">平板 / 電腦模式</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">寬屏橫向佈局 · 完整呈現神話圖鑑與詳細屬性</div>
+              </div>
+            </div>
+            <span class="text-indigo-400 text-xs">選擇 ➔</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="mt-5 text-[10px] text-slate-500">
+        💡 進入遊戲後亦可隨時於右上角切換顯示模式
+      </div>
+    </div>
+  </div>
+
+  <!-- Long Press / Info Tooltip Modal for Mobile Mode -->
+  <div id="modal-info-tooltip" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="max-w-xs w-full bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+        <div id="info-tooltip-title" class="font-bold text-amber-300 text-xs flex items-center gap-1.5 font-title">
+          <span>ℹ️</span> 詳情提示
+        </div>
+        <button id="btn-close-tooltip" class="text-slate-400 hover:text-slate-200 text-sm font-mono px-1">✕</button>
+      </div>
+      <div id="info-tooltip-desc" class="text-xs text-slate-300 leading-relaxed font-sans"></div>
+    </div>
+  </div>
+
+  <header class="h-12 bg-slate-900/95 border-b border-slate-800 px-3 sm:px-5 flex items-center justify-between shrink-0 z-20 shadow-md">
+    <div class="flex items-center space-x-2 sm:space-x-4">
+      <div class="flex items-center space-x-1.5">
+        <span class="text-xl">☯️</span>
+        <h1 class="font-title font-black text-xs sm:text-base tracking-wider bg-gradient-to-r from-amber-300 via-orange-400 to-red-400 bg-clip-text text-transparent truncate max-w-[120px] sm:max-w-none">
+          三界神煞：時空守衛
+        </h1>
+      </div>
+      <span class="hidden md:inline-block text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700/60">
+        西遊 · 三國 · 火影
+      </span>
+    </div>
+
+    <!-- Currency Displays -->
+    <div class="flex items-center space-x-2 sm:space-x-4 text-xs font-mono">
+      <div class="flex items-center space-x-1 bg-slate-800/90 px-2 py-1 rounded-lg border border-amber-500/30">
+        <span class="text-amber-400 text-sm">💰</span>
+        <span id="ui-gold" class="font-bold text-amber-300">150</span>
+      </div>
+      <div class="flex items-center space-x-1 bg-slate-800/90 px-2 py-1 rounded-lg border border-purple-500/30">
+        <span class="text-purple-400 text-sm">🔮</span>
+        <span id="ui-souls" class="font-bold text-purple-300">0</span>
+      </div>
+      <div class="flex items-center space-x-1 bg-slate-800/90 px-2 py-1 rounded-lg border border-cyan-500/30">
+        <span class="text-cyan-400 text-sm">☸️</span>
+        <span id="ui-rebirth-orbs" class="font-bold text-cyan-300">0</span>
+      </div>
+    </div>
+
+    <!-- Quick Utilities -->
+    <div class="flex items-center space-x-1.5">
+      <button id="btn-toggle-layout" class="px-2 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] flex items-center gap-1 transition border border-slate-700 font-bold" title="切換顯示版型">
+        <span id="ui-layout-icon">📱</span>
+      </button>
+      <button id="btn-audio" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs flex items-center justify-center transition border border-slate-700" title="切換音效">🔊</button>
+      <button id="btn-save" class="px-2 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] flex items-center gap-1 transition border border-slate-700 font-bold" title="存檔">
+        💾 <span class="hidden sm:inline">存檔</span>
+      </button>
+      <button id="btn-load" class="px-2 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] flex items-center gap-1 transition border border-slate-700 font-bold" title="讀檔">
+        📂 <span class="hidden sm:inline">讀檔</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main-container" class="flex-1 flex flex-col md:flex-row overflow-hidden relative min-h-0">
+
+    <section id="arena-section" class="flex-1 flex flex-col relative bg-slate-950 overflow-hidden min-h-0">
+      
+      <!-- Battle Top HUD (Wave, Kill Milestone Button, Fortress HP) -->
+      <div class="h-11 bg-slate-900/90 px-2 sm:px-4 flex items-center justify-between text-xs border-b border-slate-800 shrink-0 gap-1 sm:gap-2 z-10">
+        <div class="flex items-center space-x-2 shrink-0">
+          <span class="font-bold text-amber-400 flex items-center gap-1">
+            <span class="text-sm">🚩</span> 第 <span id="ui-wave-number" class="text-sm sm:text-base font-black text-amber-300 font-mono">1</span> 波
+          </span>
+        </div>
+
+        <!-- 50-Kill Milestone Claim Button -->
+        <button id="btn-claim-milestone" class="relative px-2 py-1 sm:px-2.5 rounded-lg bg-gradient-to-r from-amber-700/70 to-purple-800/70 hover:from-amber-600 hover:to-purple-700 border border-amber-500/50 text-amber-200 text-[11px] font-bold flex items-center gap-1 transition shadow shrink-0">
+          <span>🎁</span>
+          <span class="hidden sm:inline">機緣</span>
+          <span id="ui-kill-progress" class="font-mono text-[10px] text-amber-300">(0/50)</span>
+          <span id="ui-milestone-badge" class="hidden absolute -top-1.5 -right-1.5 w-4 h-4 sm:w-5 sm:h-5 bg-red-600 text-white text-[9px] sm:text-[10px] rounded-full flex items-center justify-center font-bold border border-white animate-bounce shadow">0</span>
+        </button>
+
+        <!-- Fortress HP bar -->
+        <div class="flex items-center gap-1.5 sm:gap-2 w-32 sm:w-56 shrink-0">
+          <span class="text-[10px] font-bold text-emerald-400 whitespace-nowrap hidden sm:inline">陣眼</span>
+          <div class="flex-1 bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700 relative">
+            <div id="ui-hp-bar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-200" style="width: 100%;"></div>
+          </div>
+          <span id="ui-hp-text" class="text-[10px] font-mono text-slate-300 min-w-[45px] text-right">500</span>
+        </div>
+      </div>
+
+      <div id="canvas-container" class="flex-1 relative w-full h-full min-h-0">
+        <canvas id="gameCanvas" class="w-full h-full block bg-slate-950"></canvas>
+
+        <!-- Wave Progress Bar -->
+        <div class="absolute bottom-2 left-4 right-4 sm:left-6 sm:right-6 flex flex-col gap-1 pointer-events-none z-10">
+          <div class="flex justify-between text-[10px] sm:text-[11px] text-slate-300 font-mono px-1">
+            <span class="flex items-center gap-1 text-slate-400">🌊 波次進度</span>
+            <span id="ui-wave-count" class="font-bold text-amber-400">0 / 12</span>
+          </div>
+          <div class="w-full bg-slate-900/80 backdrop-blur h-1.5 sm:h-2 rounded-full overflow-hidden border border-slate-700/60 shadow">
+            <div id="ui-wave-progress-bar" class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-300" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- REFINED: Compact Sleek Boss Banner that does NOT block the field -->
+        <div id="boss-banner" class="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 sm:px-4 sm:py-1.5 bg-red-950/75 border border-red-500/70 rounded-full shadow-lg backdrop-blur-sm transform -translate-y-20 opacity-0 transition-all duration-500 pointer-events-none flex items-center gap-2 z-20">
+          <span class="text-sm animate-pulse">⚠️</span>
+          <span class="text-[10px] sm:text-xs font-bold text-red-200 font-title tracking-wider flex items-center gap-1">
+            強敵來襲：<span id="boss-name" class="text-amber-300 font-black">混世牛魔王</span>
+          </span>
+        </div>
+
+        <!-- 50-Kill Cumulative Milestone Modal -->
+        <div id="modal-milestone-cards" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-40 flex flex-col items-center justify-center p-4 hidden">
+          <div class="text-center mb-4 max-w-lg">
+            <div class="text-xs font-semibold text-purple-400 tracking-widest uppercase">功德圓滿 · 誅魔天賜</div>
+            <h2 class="text-xl md:text-2xl font-black text-slate-100 font-title mt-1">領取誅魔機緣 (剩餘 <span id="modal-milestone-count" class="text-amber-400 font-mono">0</span> 次)</h2>
+            <p class="text-xs text-slate-400 mt-1">每斬殺 50 隻妖魔可累積一次機緣，隨選即得即時或永久加持！</p>
+          </div>
+          <div id="milestone-cards-container" class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 max-w-4xl w-full"></div>
+        </div>
+
+        <!-- Roguelike Level Up Modal -->
+        <div id="modal-rogue-cards" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md z-30 flex flex-col items-center justify-center p-4 hidden">
+          <div class="text-center mb-4">
+            <div class="text-xs font-semibold text-amber-400 tracking-widest uppercase">神通頓悟 · 天命所歸</div>
+            <h2 class="text-xl md:text-2xl font-black text-slate-100 font-title mt-1">選擇本戰局奇遇加持</h2>
+            <p class="text-xs text-slate-400 mt-1">本局永久生效，輪迴後重置重鑄不同神技流派</p>
+          </div>
+          <div id="rogue-cards-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl w-full"></div>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div id="modal-gameover" class="absolute inset-0 bg-red-950/95 backdrop-blur-lg z-40 flex flex-col items-center justify-center p-6 hidden">
+          <div class="text-center max-w-md bg-slate-900/90 border border-red-500/50 p-6 rounded-2xl shadow-2xl">
+            <div class="text-4xl mb-2">💥</div>
+            <h3 class="text-2xl font-black text-red-400 font-title mb-1">陣眼破碎 · 萬劫重啟</h3>
+            <p class="text-xs text-slate-400 mb-4">雖然防線失守，但英魂真靈不滅。保留所有靈魄神晶與至寶，重組陣型再戰！</p>
+            
+            <div class="bg-slate-950/60 rounded-xl p-3 mb-5 border border-slate-800 text-xs space-y-1.5 font-mono">
+              <div class="flex justify-between">
+                <span class="text-slate-400">本次堅守波次：</span>
+                <span id="gameover-waves" class="text-amber-400 font-bold">第 1 波</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">總擊殺妖魔：</span>
+                <span id="gameover-kills" class="text-red-400 font-bold">0 隻</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">收穫靈魄神晶：</span>
+                <span id="gameover-souls" class="text-purple-400 font-bold">+0 🔮</span>
+              </div>
+            </div>
+            <button id="btn-gameover-restart" class="w-full py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-slate-900 font-black rounded-xl text-sm transition shadow-lg">
+              重新凝聚陣眼
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Battle Arena Bottom Controls - Strictly docked and visible on mobile -->
+      <div id="battle-bottom-controls" class="h-9 sm:h-10 bg-slate-900/95 px-3 sm:px-4 flex items-center justify-between text-xs border-t border-slate-800 shrink-0 z-20 shadow-lg">
+        <div class="flex items-center space-x-2">
+          <!-- Multi-Speed Toggle: 1x -> 3x -> 5x -->
+          <button id="btn-game-speed" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 font-bold flex items-center gap-1 transition text-xs">
+            <span>⚡ 倍速:</span> <span id="ui-speed-label">1.0x</span>
+          </button>
+          <button id="btn-auto-wave" class="px-2.5 py-1 rounded-md bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-bold flex items-center gap-1 transition text-xs">
+            <span>🔄 自動:</span> <span id="ui-auto-label">開啟</span>
+          </button>
+        </div>
+        <div class="text-[10px] sm:text-[11px] text-slate-400">點擊地圖聚靈標記</div>
+      </div>
+    </section>
+
+    <!-- Right Control Panel: Deep Progression Tabs -->
+    <aside id="control-sidebar" class="w-full md:w-96 lg:w-[420px] bg-slate-900 flex flex-col md:h-full border-t md:border-t-0 md:border-l border-slate-800 shrink-0 overflow-hidden min-h-0">
+      
+      <!-- 5-Column Grid Navigation -->
+      <nav class="grid grid-cols-5 border-b border-slate-800 bg-slate-950 text-[10px] sm:text-xs font-bold shrink-0 w-full shadow-inner">
+        <button data-tab="tab-inrun" class="tab-btn active flex flex-col items-center justify-center py-2 px-1 text-amber-300 border-b-2 border-amber-500 bg-slate-800 transition">
+          <span class="text-sm sm:text-base mb-0.5">⚔️</span>
+          <span class="text-[9px] sm:text-[10px] whitespace-nowrap">局內強化</span>
+        </button>
+        <button data-tab="tab-heroes" class="tab-btn flex flex-col items-center justify-center py-2 px-1 text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition">
+          <span class="text-sm sm:text-base mb-0.5">🏛️</span>
+          <span class="text-[9px] sm:text-[10px] whitespace-nowrap">英雄陣列</span>
+        </button>
+        <button data-tab="tab-talents" class="tab-btn flex flex-col items-center justify-center py-2 px-1 text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition">
+          <span class="text-sm sm:text-base mb-0.5">🌲</span>
+          <span class="text-[9px] sm:text-[10px] whitespace-nowrap">永久天賦</span>
+        </button>
+        <button data-tab="tab-relics" class="tab-btn flex flex-col items-center justify-center py-2 px-1 text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition">
+          <span class="text-sm sm:text-base mb-0.5">🏆</span>
+          <span class="text-[9px] sm:text-[10px] whitespace-nowrap">三界至寶</span>
+        </button>
+        <button data-tab="tab-rebirth" class="tab-btn flex flex-col items-center justify-center py-2 px-1 text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition">
+          <span class="text-sm sm:text-base mb-0.5">☸️</span>
+          <span class="text-[9px] sm:text-[10px] whitespace-nowrap">輪迴飛升</span>
+        </button>
+      </nav>
+
+      <!-- TAB 1: In-Run Upgrade Panel -->
+      <div id="tab-inrun" class="tab-pane flex-1 flex flex-col p-3 sm:p-4 overflow-y-auto space-y-2.5 sm:space-y-3 min-h-0">
+        <div class="flex items-center justify-between bg-slate-950/60 p-2 sm:p-2.5 rounded-xl border border-slate-800 shrink-0">
+          <div>
+            <div class="text-[11px] sm:text-xs text-slate-400">戰局即時金幣儲備</div>
+            <div class="text-base sm:text-lg font-mono font-bold text-amber-400 flex items-center gap-1">
+              💰 <span id="tab-gold-count">150</span>
+            </div>
+          </div>
+          <div class="text-right text-[10px] sm:text-[11px] text-slate-400">
+            <span>擊敗妖魔獲得</span><br>
+            <span class="text-amber-500/80">僅當前戰局有效</span>
+          </div>
+        </div>
+        <div id="inrun-upgrades-list" class="space-y-2 sm:space-y-2.5"></div>
+      </div>
+
+      <!-- TAB 2: Heroes Roster -->
+      <div id="tab-heroes" class="tab-pane hidden flex-1 flex flex-col p-3 sm:p-4 overflow-y-auto space-y-2.5 sm:space-y-3 min-h-0">
+        <div class="text-[11px] sm:text-xs text-slate-400 bg-slate-950/60 p-2 rounded-lg border border-slate-800 flex items-center justify-between shrink-0">
+          <span>解鎖並升級英雄，增強陣法火力。</span>
+          <span class="text-purple-400 font-mono font-bold" id="tab-souls-count">0 🔮</span>
+        </div>
+        <div id="heroes-list" class="space-y-2.5 sm:space-y-3"></div>
+      </div>
+
+      <!-- TAB 3: Permanent Talents -->
+      <div id="tab-talents" class="tab-pane hidden flex-1 flex flex-col p-3 sm:p-4 overflow-y-auto space-y-2.5 sm:space-y-3 min-h-0">
+        <div class="bg-gradient-to-r from-purple-900/40 to-slate-900 p-2.5 sm:p-3 rounded-xl border border-purple-500/30 shrink-0">
+          <div class="text-xs font-bold text-purple-300">🌲 萬界天賦古樹 (永久生效)</div>
+          <div class="text-[10px] sm:text-[11px] text-slate-300 mt-0.5">消耗「靈魄神晶」，永久提升全體屬性。</div>
+        </div>
+        <div id="talents-list" class="space-y-2 sm:space-y-2.5"></div>
+      </div>
+
+      <!-- TAB 4: Relics & Artifacts -->
+      <div id="tab-relics" class="tab-pane hidden flex-1 flex flex-col p-3 sm:p-4 overflow-y-auto space-y-2.5 sm:space-y-3 min-h-0">
+        <div class="bg-gradient-to-r from-amber-950/40 to-slate-900 p-2.5 sm:p-3 rounded-xl border border-amber-500/30 shrink-0">
+          <div class="text-xs font-bold text-amber-300">🏆 三界至尊神器圖鑑</div>
+          <div class="text-[10px] sm:text-[11px] text-slate-300 mt-0.5">首領波次機率獲取，集齊啟動被動神技。</div>
+        </div>
+        <div id="relics-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5"></div>
+      </div>
+
+      <!-- TAB 5: Rebirth / Prestige -->
+      <div id="tab-rebirth" class="tab-pane hidden flex-1 flex flex-col p-3 sm:p-4 overflow-y-auto space-y-3 sm:space-y-4 min-h-0">
+        <div class="bg-gradient-to-r from-cyan-950/40 to-slate-900 p-2.5 sm:p-3 rounded-xl border border-cyan-500/40 shrink-0">
+          <div class="text-xs font-bold text-cyan-300">☸️ 六道輪迴 · 涅槃飛升</div>
+          <div class="text-[10px] sm:text-[11px] text-slate-300 mt-1 leading-relaxed">
+            重置戰局進度，將最高波次轉化為「輪迴玄石」獲取強大法則！
+          </div>
+        </div>
+        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 space-y-2 text-xs shrink-0">
+          <div class="flex justify-between">
+            <span class="text-slate-400">當前輪迴石存量：</span>
+            <span id="rebirth-current-stones" class="font-bold text-cyan-400 font-mono">0</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">飛升可得玄石：</span>
+            <span id="rebirth-gain-preview" class="font-bold text-emerald-400 font-mono">+0</span>
+          </div>
+          <button id="btn-trigger-rebirth" class="mt-2 w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-lg shadow-lg transition text-xs">
+            進行輪迴飛升
+          </button>
+        </div>
+        <div class="text-xs font-bold text-slate-300 pt-2 border-t border-slate-800 shrink-0">
+          輪迴法相 (專屬飛升特權)
+        </div>
+        <div id="rebirth-perks-list" class="space-y-2 sm:space-y-2.5"></div>
+      </div>
+    </aside>
+  </main>
+
+  <div id="toast-container" class="fixed bottom-12 sm:bottom-5 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center space-y-2 pointer-events-none"></div>
+
+  <script>
+    let isMobileMode = false;
+
+    function setDisplayMode(mobile) {
+      isMobileMode = mobile;
+      if (isMobileMode) {
+        document.body.classList.add('mode-mobile');
+        const icon = document.getElementById('ui-layout-icon');
+        if (icon) icon.textContent = '💻';
+      } else {
+        document.body.classList.remove('mode-mobile');
+        const icon = document.getElementById('ui-layout-icon');
+        if (icon) icon.textContent = '📱';
+      }
+      resizeCanvas();
+      renderInRunTab();
+      renderHeroesTab();
+      renderTalentsTab();
+      renderRelicsTab();
+      renderRebirthTab();
+    }
+
+    // Long press and tooltip display helper for Mobile mode
+    function showInfoTooltip(title, desc) {
+      const modal = document.getElementById('modal-info-tooltip');
+      const tEl = document.getElementById('info-tooltip-title');
+      const dEl = document.getElementById('info-tooltip-desc');
+      if (!modal || !tEl || !dEl) return;
+      tEl.innerHTML = `<span>ℹ️</span> ${title}`;
+      dEl.textContent = desc;
+      modal.classList.remove('hidden');
+    }
+
+    function attachLongPress(el, title, desc) {
+      let pressTimer;
+      let isLongPress = false;
+
+      const start = () => {
+        isLongPress = false;
+        pressTimer = setTimeout(() => {
+          isLongPress = true;
+          showInfoTooltip(title, desc);
+        }, 450);
+      };
+
+      const cancel = () => {
+        clearTimeout(pressTimer);
+      };
+
+      el.addEventListener('touchstart', start, { passive: true });
+      el.addEventListener('touchend', cancel, { passive: true });
+      el.addEventListener('touchmove', cancel, { passive: true });
+      el.addEventListener('mousedown', start);
+      el.addEventListener('mouseup', cancel);
+      el.addEventListener('mouseleave', cancel);
+    }
+
+    let audioInitialized = false;
+    let hitSynth, shootSynth, upgradeSynth, bossSynth;
+
+    function initAudio() {
+      if (audioInitialized) return;
+      try {
+        hitSynth = new Tone.MembraneSynth({ volume: -16 }).toDestination();
+        shootSynth = new Tone.PolySynth(Tone.Synth, {
+          volume: -20,
+          oscillator: { type: "triangle" },
+          envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+        }).toDestination();
+        upgradeSynth = new Tone.PolySynth(Tone.Synth, {
+          volume: -14,
+          envelope: { attack: 0.02, decay: 0.2, sustain: 0.1, release: 0.3 }
+        }).toDestination();
+        bossSynth = new Tone.FMSynth({ volume: -12 }).toDestination();
+        Tone.start();
+        audioInitialized = true;
+      } catch (e) {
+        console.warn('Audio Init Error', e);
+      }
+    }
+
+    function playSound(type) {
+      if (!gameState.soundEnabled || !audioInitialized) return;
+      try {
+        if (type === 'shoot') shootSynth.triggerAttackRelease("C5", "32n");
+        else if (type === 'hit') hitSynth.triggerAttackRelease("A1", "16n");
+        else if (type === 'upgrade') upgradeSynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "16n");
+        else if (type === 'boss') bossSynth.triggerAttackRelease("C2", "8n");
+        else if (type === 'card') upgradeSynth.triggerAttackRelease(["G4", "B4", "D5"], "8n");
+      } catch (err) {}
+    }
+
+    const HERO_ROSTER = [
+      { id: 'wukong', name: '齊天大聖 · 孫悟空', realm: '西遊', desc: '金箍棒範圍橫掃，物理崩裂', avatar: '🐒', color: '#f59e0b', cost: 0, unlocked: true, level: 1, baseDmg: 24, dmgPerLvl: 9, fireRate: 1.2, range: 170, type: 'splash', projectileColor: '#fbbf24', costUpgrade: 10 },
+      { id: 'naruto', name: '漩渦鳴人', realm: '火影', desc: '螺旋丸多段查克拉氣流爆破', avatar: '🍥', color: '#f97316', cost: 15, unlocked: false, level: 1, baseDmg: 38, dmgPerLvl: 14, fireRate: 1.6, range: 190, type: 'rapid', projectileColor: '#38bdf8', costUpgrade: 20 },
+      { id: 'zhuge', name: '臥龍諸葛', realm: '三國', desc: '八卦陣光線，施加減速雷霆', avatar: '🪶', color: '#3b82f6', cost: 40, unlocked: false, level: 1, baseDmg: 20, dmgPerLvl: 8, fireRate: 0.9, range: 220, type: 'slow', projectileColor: '#60a5fa', costUpgrade: 35 },
+      { id: 'sasuke', name: '宇智波佐助', realm: '火影', desc: '千鳥真打，直線高穿透暴擊', avatar: '🦅', color: '#a855f7', cost: 90, unlocked: false, level: 1, baseDmg: 65, dmgPerLvl: 22, fireRate: 1.1, range: 210, type: 'pierce', projectileColor: '#c084fc', costUpgrade: 60 },
+      { id: 'guanyu', name: '武聖關羽', realm: '三國', desc: '青龍偃月，斬殺高血量精銳', avatar: '🐉', color: '#10b981', cost: 180, unlocked: false, level: 1, baseDmg: 120, dmgPerLvl: 45, fireRate: 0.7, range: 180, type: 'execute', projectileColor: '#34d399', costUpgrade: 120 },
+      { id: 'lubu', name: '無雙呂布', realm: '三國', desc: '方天畫戟霸者無雙破甲氣勁', avatar: '👹', color: '#ef4444', cost: 350, unlocked: false, level: 1, baseDmg: 210, dmgPerLvl: 75, fireRate: 0.85, range: 230, type: 'splash', projectileColor: '#f87171', costUpgrade: 220 }
+    ];
+
+    const TALENTS_DATA = [
+      { id: 't_atk', name: '大梵天誅仙氣', icon: '🗡️', desc: '全英雄基礎攻擊力 +8%', maxLvl: 100, costBase: 5, costMult: 1.35, level: 0 },
+      { id: 't_spd', name: '飛雷神瞬身術', icon: '⚡', desc: '全體攻擊速度 +4%', maxLvl: 50, costBase: 8, costMult: 1.4, level: 0 },
+      { id: 't_crit', name: '萬花筒寫輪眼', icon: '👁️', desc: '暴擊率 +1.5%，暴擊傷害 +8%', maxLvl: 40, costBase: 12, costMult: 1.45, level: 0 },
+      { id: 't_hp', name: '玄武金剛結界', icon: '🛡️', desc: '陣眼結界生命上限 +15%', maxLvl: 80, costBase: 6, costMult: 1.35, level: 0 },
+      { id: 't_regen', name: '陰陽遁百豪印', icon: '💚', desc: '陣眼每秒自動修復 +3 生命', maxLvl: 50, costBase: 10, costMult: 1.38, level: 0 },
+      { id: 't_soul', name: '老君煉丹術', icon: '🔮', desc: '擊破妖魔獲神晶機率 +3%', maxLvl: 30, costBase: 15, costMult: 1.5, level: 0 },
+      { id: 't_thorn', name: '須佐能乎反震', icon: '🌀', desc: '受碰撞時反震 35% 攻擊力', maxLvl: 40, costBase: 10, costMult: 1.4, level: 0 }
+    ];
+
+    const RELICS_DATA = [
+      { id: 'r_rpb', name: '如意金箍棒', origin: '西遊', icon: '🥢', desc: '全體英雄暴擊傷害額外 +60%', owned: false },
+      { id: 'r_fan', name: '芭蕉寶扇', origin: '西遊', icon: '🪭', desc: '攻擊機率觸發颶風擊退妖魔', owned: false },
+      { id: 'r_blade', name: '青龍偃月刀', origin: '三國', icon: '🗡️', desc: '對血量 >70% 強敵傷害 +50%', owned: false },
+      { id: 'r_chart', name: '出師表神算符', origin: '三國', icon: '📜', desc: '戰局內強化升級花費降低 15%', owned: false },
+      { id: 'r_sharingan', name: '永恆萬花筒', origin: '火影', icon: '🔴', desc: '全隊基礎攻擊速度常駐 +25%', owned: false },
+      { id: 'r_rinnegan', name: '六道輪迴眼', origin: '火影', icon: '🟣', desc: '輪迴飛升時玄石收益 +40%', owned: false }
+    ];
+
+    const REBIRTH_PERKS = [
+      { id: 'rb_skip', name: '縮地成寸', icon: '👣', desc: '開局自動跨越至歷史最高波 25%', cost: 1, level: 0, max: 1 },
+      { id: 'rb_gold', name: '聚寶金盆', icon: '🪙', desc: '每秒自動凝結戰局金幣 +2 兩', cost: 2, level: 0, max: 5 },
+      { id: 'rb_dmg', name: '鴻蒙仙印', icon: '✨', desc: '全局總傷害獨立乘算 +20%', cost: 3, level: 0, max: 10 }
+    ];
+
+    const ROGUE_CARDS_POOL = [
+      { id: 'rc_speed', title: '疾風影分身', realm: '火影', icon: '💨', desc: '全英雄攻擊速度 +20%', stat: 'spd', val: 0.2 },
+      { id: 'rc_crit', title: '千鳥銳槍', realm: '火影', icon: '⚡', desc: '暴擊率 +10%，暴傷 +25%', stat: 'crit', val: 0.1 },
+      { id: 'rc_splash', title: '七十二變裂地', realm: '西遊', icon: '🐒', desc: '攻擊範圍擴大 25%', stat: 'range', val: 0.25 },
+      { id: 'rc_dmg', title: '七星借東風', realm: '三國', icon: '🔥', desc: '全體攻擊傷害 +30%', stat: 'dmg', val: 0.3 },
+      { id: 'rc_gold', title: '木牛流馬', realm: '三國', icon: '🌾', desc: '每波結束額外獲 60 兩', stat: 'waveGold', val: 60 },
+      { id: 'rc_heal', title: '蟠桃瓊漿', realm: '西遊', icon: '🍑', desc: '陣眼立即修復 40% 生命', stat: 'heal', val: 0.4 }
+    ];
+
+    const MILESTONE_REWARD_POOL = [
+      { id: 'm_soul', title: '太古靈源', icon: '🔮', type: 'souls', val: 30, desc: '直接吸收天地精華，獲 30 枚神晶' },
+      { id: 'm_gold', title: '陶朱富民', icon: '💰', type: 'gold', val: 200, desc: '軍資大饋贈，立即獲 200 戰局銀兩' },
+      { id: 'm_heal', title: '神農百草', icon: '🌿', type: 'heal', val: 0.5, desc: '修復陣眼 50% 生命值，固若金湯' },
+      { id: 'm_atk', title: '誅仙劍氣', icon: '🗡️', type: 'temp_atk', val: 0.35, desc: '本次戰局英雄傷害永久 +35%' },
+      { id: 'm_crit', title: '天道真眼', icon: '🎯', type: 'temp_crit', val: 0.15, desc: '戰局暴擊率 +15%，暴傷 +30%' },
+      { id: 'm_speed', title: '飛雷神陣', icon: '⚡', type: 'temp_spd', val: 0.25, desc: '戰局全英雄攻速永久 +25%' }
+    ];
+
+    let gameState = {
+      gold: 150,
+      souls: 0,
+      rebirthOrbs: 0,
+      highestWave: 1,
+      currentWave: 1,
+      killsThisRun: 0,
+      killsMilestoneProgress: 0,
+      pendingMilestoneCards: 0,
+      frenzyTimer: 0,
+      soundEnabled: true,
+      autoWave: true,
+      gameSpeed: 1.0, // Toggles: 1 -> 3 -> 5
+      
+      runUpgrades: {
+        atk: { lvl: 1, cost: 20 },
+        spd: { lvl: 1, cost: 25 },
+        crit: { lvl: 0, cost: 35 },
+        hp: { lvl: 1, cost: 20 },
+        thorn: { lvl: 0, cost: 30 },
+        dmgRed: { lvl: 0, cost: 25 }
+      },
+
+      heroes: JSON.parse(JSON.stringify(HERO_ROSTER)),
+      talents: JSON.parse(JSON.stringify(TALENTS_DATA)),
+      relics: JSON.parse(JSON.stringify(RELICS_DATA)),
+      rebirthPerks: JSON.parse(JSON.stringify(REBIRTH_PERKS)),
+      runPerks: []
+    };
+
+    let canvas, ctx;
+    let canvasW = 600, canvasH = 600;
+    let enemies = [];
+    let projectiles = [];
+    let particles = [];
+    let damageTexts = [];
+    let fortress = { x: 300, y: 300, radius: 46, hp: 500, maxHp: 500 };
+    let waveState = {
+      enemiesLeftToSpawn: 12,
+      totalWaveEnemies: 12,
+      spawnTimer: 0,
+      spawnInterval: 1200,
+      isWaveActive: true
+    };
+    let lastTime = 0;
+
+    function getDerivedStats() {
+      const { atk, spd, crit, hp, thorn, dmgRed } = gameState.runUpgrades;
+
+      const talAtk = (gameState.talents.find(t => t.id === 't_atk')?.level || 0) * 0.08;
+      const talAtkSpd = (gameState.talents.find(t => t.id === 't_spd')?.level || 0) * 0.04;
+      const talCrit = (gameState.talents.find(t => t.id === 't_crit')?.level || 0) * 0.015;
+      const talCritDmg = (gameState.talents.find(t => t.id === 't_crit')?.level || 0) * 0.08;
+      const talHp = (gameState.talents.find(t => t.id === 't_hp')?.level || 0) * 0.15;
+      const talRegen = (gameState.talents.find(t => t.id === 't_regen')?.level || 0) * 3;
+      const talThorn = (gameState.talents.find(t => t.id === 't_thorn')?.level || 0) * 0.35;
+
+      const relicBonus = {
+        critDmg: gameState.relics.find(r => r.id === 'r_rpb')?.owned ? 0.6 : 0,
+        knockback: gameState.relics.find(r => r.id === 'r_fan')?.owned ? 0.4 : 0,
+        executeDmg: gameState.relics.find(r => r.id === 'r_blade')?.owned ? 0.5 : 0,
+        costDiscount: gameState.relics.find(r => r.id === 'r_chart')?.owned ? 0.15 : 0,
+        atkSpd: gameState.relics.find(r => r.id === 'r_sharingan')?.owned ? 0.25 : 0
+      };
+
+      let rogueDmgMult = 1.0, rogueSpdMult = 1.0, rogueCritMult = 0, rogueRangeMult = 1.0;
+      gameState.runPerks.forEach(p => {
+        if (p.stat === 'dmg' || p.stat === 'temp_atk') rogueDmgMult += p.val;
+        if (p.stat === 'spd' || p.stat === 'temp_spd') rogueSpdMult += p.val;
+        if (p.stat === 'crit' || p.stat === 'temp_crit') rogueCritMult += p.val;
+        if (p.stat === 'range') rogueRangeMult += p.val;
+      });
+
+      const rebirthDmgMult = 1 + (gameState.rebirthPerks.find(p => p.id === 'rb_dmg')?.level || 0) * 0.2;
+      const totalMaxHp = Math.round((500 + hp.lvl * 65) * (1 + talHp));
+      const totalThorns = Math.round((thorn.lvl * 15) * (1 + talThorn));
+      const runDmgReduction = Math.min(dmgRed.lvl * 0.04, 0.72);
+
+      return {
+        runAtkBonus: (atk.lvl - 1) * 0.12,
+        runSpdBonus: (spd.lvl - 1) * 0.08,
+        runCritChance: (crit.lvl * 0.02) + talCrit + rogueCritMult,
+        critMultiplier: 1.5 + talCritDmg + relicBonus.critDmg,
+        totalMaxHp,
+        totalThorns,
+        talRegen,
+        relicBonus,
+        rogueDmgMult,
+        rogueSpdMult,
+        rogueRangeMult,
+        rebirthDmgMult,
+        talAtk,
+        talAtkSpd,
+        dmgReduction: runDmgReduction
+      };
+    }
+
+    function spawnEnemy(isBoss = false) {
+      const stats = getDerivedStats();
+      const wave = gameState.currentWave;
+      const angle = Math.random() * Math.PI * 2;
+      
+      const distance = Math.max(canvasW, canvasH) * 0.6 + 40; 
+      const x = fortress.x + Math.cos(angle) * distance;
+      const y = fortress.y + Math.sin(angle) * distance;
+
+      const baseHp = (30 + wave * 18 + Math.pow(wave, 1.45)) * (isBoss ? 7.5 : 1);
+      const baseSpeed = (isBoss ? 0.225 : (0.375 + Math.min(0.6, wave * 0.01))); 
+      const goldReward = Math.floor((3 + wave * 0.8));
+
+      const types = [
+        { type: 'grunt', color: '#ef4444', size: 13, name: '卒' },
+        { type: 'speedy', color: '#f59e0b', size: 10, speedMult: 1.4, hpMult: 0.6, name: '忍' },
+        { type: 'tank', color: '#8b5cf6', size: 19, speedMult: 0.65, hpMult: 2.2, name: '將' }
+      ];
+      const chosenType = isBoss ? { type: 'boss', color: '#ec4899', size: 28, speedMult: 0.7, hpMult: 1, name: '魔' } : types[Math.floor(Math.random() * types.length)];
+
+      enemies.push({
+        x, y,
+        hp: baseHp * (chosenType.hpMult || 1),
+        maxHp: baseHp * (chosenType.hpMult || 1),
+        speed: baseSpeed * (chosenType.speedMult || 1),
+        radius: chosenType.size,
+        color: chosenType.color,
+        name: chosenType.name,
+        gold: isBoss ? goldReward * 4 : goldReward,
+        isBoss,
+        slowTimer: 0,
+        burnTimer: 0,
+        wobblePhase: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.002 + Math.random() * 0.003,
+        wobbleAmp: 1.5 + Math.random() * 2.0
+      });
+    }
+
+    function triggerRandomKillDrop(en) {
+      const dropRoll = Math.random();
+      if (dropRoll < 0.35) {
+        const bonusGold = Math.floor(10 + Math.random() * 25 + gameState.currentWave * 2);
+        gameState.gold += bonusGold;
+        damageTexts.push({ x: en.x, y: en.y - 25, text: `💰+${bonusGold}兩!`, color: '#fbbf24', life: 40 });
+      } else if (dropRoll < 0.65) {
+        const healAmt = Math.round(fortress.maxHp * 0.08);
+        fortress.hp = Math.min(fortress.maxHp, fortress.hp + healAmt);
+        damageTexts.push({ x: en.x, y: en.y - 25, text: `💚+${healAmt}HP`, color: '#34d399', life: 40 });
+        showToast(`仙露靈丹修復 +${healAmt} 陣眼生命！`);
+      } else if (dropRoll < 0.85) {
+        const soulsGain = Math.floor(2 + Math.random() * 4);
+        gameState.souls += soulsGain;
+        damageTexts.push({ x: en.x, y: en.y - 25, text: `🔮+${soulsGain}神晶!`, color: '#a78bfa', life: 45 });
+      } else {
+        gameState.frenzyTimer = 6000;
+        showToast('🔥 拾獲戰狂靈符！全隊攻速爆發 50% (持續 6 秒)！');
+        damageTexts.push({ x: en.x, y: en.y - 25, text: `⚡戰狂暴走!`, color: '#f43f5e', life: 45 });
+      }
+    }
+
+    function openMilestoneRewardModal() {
+      if ((gameState.pendingMilestoneCards || 0) <= 0) {
+        showToast('尚無待領取的機緣，請繼續擊倒妖魔！');
+        return;
+      }
+      playSound('card');
+      const modal = document.getElementById('modal-milestone-cards');
+      const container = document.getElementById('milestone-cards-container');
+      const countEl = document.getElementById('modal-milestone-count');
+      if (!modal || !container || !countEl) return;
+
+      countEl.textContent = gameState.pendingMilestoneCards;
+      container.innerHTML = '';
+      
+      const picks = [...MILESTONE_REWARD_POOL].sort(() => 0.5 - Math.random()).slice(0, 3);
+      picks.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-slate-900/90 border border-purple-500/40 hover:border-purple-400 hover:glow-chakra rounded-2xl p-4 sm:p-5 cursor-pointer transition-all transform hover:-translate-y-1.5 flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-2xl sm:text-3xl">${item.icon}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">誅魔功德</span>
+            </div>
+            <h4 class="text-sm sm:text-base font-black text-slate-100 font-title mb-1">${item.title}</h4>
+            <p class="text-[10px] sm:text-xs text-slate-300 leading-relaxed">${item.desc}</p>
+          </div>
+          <button class="mt-4 w-full py-2 bg-gradient-to-r from-purple-700 to-indigo-700 rounded-xl font-bold text-white text-xs shadow">納入麾下</button>
+        `;
+        card.onclick = () => {
+          applyMilestoneReward(item);
+          gameState.pendingMilestoneCards--;
+          playSound('upgrade');
+          if (gameState.pendingMilestoneCards > 0) openMilestoneRewardModal();
+          else modal.classList.add('hidden');
+          updateUI();
+        };
+        container.appendChild(card);
+      });
+      modal.classList.remove('hidden');
+    }
+
+    function applyMilestoneReward(reward) {
+      if (reward.type === 'souls') { gameState.souls += reward.val; showToast(`獲靈魄神晶 +${reward.val}！`); }
+      else if (reward.type === 'gold') { gameState.gold += reward.val; showToast(`獲戰局銀兩 +${reward.val}！`); }
+      else if (reward.type === 'heal') {
+        const amt = Math.round(fortress.maxHp * reward.val);
+        fortress.hp = Math.min(fortress.maxHp, fortress.hp + amt);
+        showToast(`陣眼回春修復 +${amt} 生命！`);
+      }
+      else {
+        gameState.runPerks.push({ id: reward.id, stat: reward.type, val: reward.val });
+        showToast(`獲得全體能力增幅加持！`);
+      }
+    }
+
+    function gameLoop(now) {
+      if (!lastTime) lastTime = now;
+      let rawDelta = now - lastTime;
+      lastTime = now;
+
+      if (rawDelta > 1000) rawDelta = 16; 
+      
+      const delta = rawDelta * gameState.gameSpeed;
+      update(delta);
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function update(delta) {
+      if (fortress.hp <= 0) return;
+
+      const stats = getDerivedStats();
+      fortress.maxHp = stats.totalMaxHp;
+      fortress.hp = Math.min(fortress.maxHp, fortress.hp + (stats.talRegen * (delta / 1000)));
+
+      const passiveGoldLvl = gameState.rebirthPerks.find(p => p.id === 'rb_gold')?.level || 0;
+      if (passiveGoldLvl > 0) gameState.gold += (passiveGoldLvl * 2) * (delta / 1000);
+      if (gameState.frenzyTimer > 0) gameState.frenzyTimer -= delta;
+
+      // 1. Spawning
+      if (waveState.isWaveActive) {
+        if (waveState.enemiesLeftToSpawn === waveState.totalWaveEnemies && waveState.spawnTimer === 0) {
+           waveState.spawnTimer = waveState.spawnInterval;
+        }
+
+        waveState.spawnTimer += delta;
+        if (waveState.spawnTimer >= waveState.spawnInterval && waveState.enemiesLeftToSpawn > 0) {
+          waveState.spawnTimer = 0;
+          const isBoss = (gameState.currentWave % 5 === 0) && (waveState.enemiesLeftToSpawn === 1);
+          spawnEnemy(isBoss);
+          waveState.enemiesLeftToSpawn--;
+        }
+
+        if (waveState.enemiesLeftToSpawn <= 0 && enemies.length === 0) {
+          onWaveCleared();
+        }
+      }
+
+      // 2. Hero Action - REQ 1: Orbit Speed increased by 70% (0.4 * 1.7 = 0.68)
+      const activeHeroes = gameState.heroes.filter(h => h.unlocked);
+      const orbitRadius = fortress.radius + 28;
+      const timeSec = performance.now() / 1000;
+
+      activeHeroes.forEach((hero, index) => {
+        // Orbit speed increased 70% from 0.4 to 0.68
+        const heroAngle = timeSec * 0.68 + (index * (Math.PI * 2 / activeHeroes.length));
+        hero.x = fortress.x + Math.cos(heroAngle) * orbitRadius;
+        hero.y = fortress.y + Math.sin(heroAngle) * orbitRadius;
+
+        hero.lastAttack = hero.lastAttack || 0;
+        const frenzyMult = (gameState.frenzyTimer > 0) ? 1.5 : 1.0;
+        const effectiveRate = hero.fireRate * (1 + stats.runSpdBonus + stats.talAtkSpd + stats.relicBonus.atkSpd) * stats.rogueSpdMult * frenzyMult;
+        
+        if (timeSec - hero.lastAttack > (1 / effectiveRate)) {
+          let target = null;
+          let minDistance = hero.range * stats.rogueRangeMult;
+
+          enemies.forEach(en => {
+            const dist = Math.hypot(en.x - hero.x, en.y - hero.y);
+            if (dist < minDistance) {
+              minDistance = dist;
+              target = en;
+            }
+          });
+
+          if (target) {
+            hero.lastAttack = timeSec;
+            fireProjectile(hero, target, stats);
+          }
+        }
+      });
+
+      // 3. Projectiles
+      for (let i = projectiles.length - 1; i >= 0; i--) {
+        const p = projectiles[i];
+        const dx = p.targetX - p.x;
+        const dy = p.targetY - p.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < p.speed * (delta / 1000) * 60) {
+          hitEnemy(p);
+          projectiles.splice(i, 1);
+        } else {
+          p.x += (dx / dist) * p.speed * (delta / 1000) * 60;
+          p.y += (dy / dist) * p.speed * (delta / 1000) * 60;
+        }
+      }
+
+      // 4. Enemy Movement & Collision
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const en = enemies[i];
+        let curSpeed = en.speed;
+        
+        if (en.slowTimer > 0) { en.slowTimer -= delta; curSpeed *= 0.5; }
+        if (en.burnTimer > 0) {
+          en.burnTimer -= delta;
+          en.hp -= 8 * (delta / 1000);
+        }
+
+        const directAngle = Math.atan2(fortress.y - en.y, fortress.x - en.x);
+        en.wobblePhase += en.wobbleSpeed * delta;
+        const waveOffset = Math.sin(en.wobblePhase) * en.wobbleAmp;
+        const curAngle = directAngle + (Math.sin(en.wobblePhase * 1.5) * 0.35);
+
+        en.x += Math.cos(curAngle) * curSpeed * (delta / 1000) * 60 + Math.cos(directAngle + Math.PI / 2) * waveOffset;
+        en.y += Math.sin(curAngle) * curSpeed * (delta / 1000) * 60 + Math.sin(directAngle + Math.PI / 2) * waveOffset;
+
+        const distToCenter = Math.hypot(fortress.x - en.x, fortress.y - en.y);
+        if (distToCenter < fortress.radius + en.radius) {
+          let rawDmg = (en.isBoss ? 45 : 12);
+          let finalDmg = rawDmg * (1 - stats.dmgReduction); 
+          fortress.hp -= finalDmg;
+          
+          if (stats.totalThorns > 0) {
+            en.hp -= stats.totalThorns;
+            damageTexts.push({ x: en.x, y: en.y - 10, text: `${Math.round(stats.totalThorns)}`, color: '#a855f7', life: 25 });
+          }
+
+          en.x -= Math.cos(directAngle) * (20 * (1 + stats.relicBonus.knockback));
+          en.y -= Math.sin(directAngle) * (20 * (1 + stats.relicBonus.knockback));
+          playSound('hit');
+
+          if (fortress.hp <= 0) {
+            fortress.hp = 0;
+            triggerGameOver();
+            return;
+          }
+        }
+
+        // Enemy Death Processing
+        if (en.hp <= 0) {
+          gameState.gold += en.gold;
+          gameState.killsThisRun++;
+          gameState.killsMilestoneProgress++;
+          
+          if (gameState.killsMilestoneProgress >= 50) {
+            gameState.killsMilestoneProgress = 0;
+            gameState.pendingMilestoneCards++;
+            playSound('card');
+            showToast('🎁 斬妖突破 50 隻！機緣已堆疊！');
+          }
+
+          if (Math.random() < 0.15) triggerRandomKillDrop(en);
+
+          const soulChance = 0.18 + (gameState.talents.find(t => t.id === 't_soul')?.level || 0) * 0.03;
+          if (Math.random() < soulChance) {
+            const soulGain = en.isBoss ? 15 : 1;
+            gameState.souls += soulGain;
+            damageTexts.push({ x: en.x, y: en.y - 15, text: `+${soulGain} 🔮`, color: '#818cf8', life: 35 });
+          }
+
+          if (en.isBoss) {
+            const unowned = gameState.relics.filter(r => !r.owned);
+            if (unowned.length > 0 && Math.random() < 0.45) {
+              const relic = unowned[Math.floor(Math.random() * unowned.length)];
+              relic.owned = true;
+              showToast(`✨ 斬魔爆寶：【${relic.name}】！`);
+              renderRelicsTab();
+            }
+          }
+
+          for (let p = 0; p < 8; p++) {
+            particles.push({ x: en.x, y: en.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, color: en.color, life: 30 });
+          }
+          enemies.splice(i, 1);
+        }
+      }
+
+      // Cleanup effects
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].x += particles[i].vx;
+        particles[i].y += particles[i].vy;
+        particles[i].life--;
+        if (particles[i].life <= 0) particles.splice(i, 1);
+      }
+      for (let i = damageTexts.length - 1; i >= 0; i--) {
+        damageTexts[i].y -= 0.6;
+        damageTexts[i].life--;
+        if (damageTexts[i].life <= 0) damageTexts.splice(i, 1);
+      }
+
+      updateUI();
+    }
+
+    function fireProjectile(hero, target, stats) {
+      playSound('shoot');
+      const isCrit = Math.random() < stats.runCritChance;
+      let dmg = (hero.baseDmg + (hero.level - 1) * hero.dmgPerLvl) * (1 + stats.runAtkBonus + stats.talAtk) * stats.rogueDmgMult * stats.rebirthDmgMult;
+      if (isCrit) dmg *= stats.critMultiplier;
+
+      projectiles.push({
+        x: hero.x, y: hero.y, targetX: target.x, targetY: target.y, targetRef: target,
+        speed: 7, dmg, isCrit, type: hero.type, color: hero.projectileColor
+      });
+    }
+
+    function hitEnemy(p) {
+      playSound('hit');
+      const target = p.targetRef;
+
+      if (p.type === 'splash') {
+        enemies.forEach(en => {
+          if (Math.hypot(en.x - p.targetX, en.y - p.targetY) <= 55) {
+            en.hp -= p.dmg;
+            spawnDamageText(en.x, en.y, p.dmg, p.isCrit);
+          }
+        });
+      } else if (p.type === 'slow' && enemies.includes(target)) {
+        target.hp -= p.dmg; target.slowTimer = 2000;
+        spawnDamageText(target.x, target.y, p.dmg, p.isCrit);
+      } else if (enemies.includes(target)) {
+        target.hp -= p.dmg;
+        spawnDamageText(target.x, target.y, p.dmg, p.isCrit);
+      }
+
+      for (let i = 0; i < 4; i++) {
+        particles.push({ x: p.targetX, y: p.targetY, vx: (Math.random()-0.5)*3, vy: (Math.random()-0.5)*3, color: p.color, life: 15 });
+      }
+    }
+
+    function spawnDamageText(x, y, dmg, isCrit) {
+      damageTexts.push({ x: x + (Math.random() - 0.5) * 12, y: y - 10, text: isCrit ? `💥${Math.round(dmg)}` : `${Math.round(dmg)}`, color: isCrit ? '#f43f5e' : '#f8fafc', life: 30 });
+    }
+
+    function onWaveCleared() {
+      waveState.isWaveActive = false;
+      const waveBonus = 20 + gameState.currentWave * 8;
+      gameState.gold += waveBonus;
+      showToast(`🚩 成功清剿第 ${gameState.currentWave} 波！獎勵 +${waveBonus} 銀兩！`);
+      if (gameState.currentWave > gameState.highestWave) gameState.highestWave = gameState.currentWave;
+
+      if (gameState.currentWave % 5 === 0) openRogueCardSelection();
+      else if (gameState.autoWave) proceedNextWave();
+    }
+
+    function proceedNextWave() {
+      gameState.currentWave++;
+      const wave = gameState.currentWave;
+      waveState.totalWaveEnemies = 10 + Math.floor(wave * 2.2);
+      waveState.enemiesLeftToSpawn = waveState.totalWaveEnemies;
+      waveState.spawnInterval = Math.max(450, 1200 - wave * 25);
+      waveState.spawnTimer = 0;
+      waveState.isWaveActive = true;
+
+      // REQ 2: Sleek, non-blocking Boss Arrival Banner
+      if (wave % 5 === 0) {
+        playSound('boss');
+        const banner = document.getElementById('boss-banner');
+        if (banner) {
+          banner.classList.remove('-translate-y-20', 'opacity-0');
+          setTimeout(() => {
+            banner.classList.add('-translate-y-20', 'opacity-0');
+          }, 3500);
+        }
+      }
+    }
+
+    function openRogueCardSelection() {
+      playSound('card');
+      const modal = document.getElementById('modal-rogue-cards');
+      const container = document.getElementById('rogue-cards-container');
+      if (!modal || !container) return;
+      container.innerHTML = '';
+
+      const pool = [...ROGUE_CARDS_POOL].sort(() => 0.5 - Math.random()).slice(0, 3);
+      pool.forEach(card => {
+        const cardEl = document.createElement('div');
+        cardEl.className = "bg-slate-900 border border-amber-500/30 hover:border-amber-400 hover:glow-gold rounded-2xl p-4 sm:p-5 cursor-pointer transition flex flex-col justify-between";
+        cardEl.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2 sm:mb-3">
+              <span class="text-2xl sm:text-3xl">${card.icon}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300">神通</span>
+            </div>
+            <h4 class="text-sm sm:text-base font-black text-slate-100 font-title mb-1">${card.title}</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">${card.desc}</p>
+          </div>
+          <button class="mt-3 sm:mt-4 w-full py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-slate-900 font-bold rounded-xl text-xs">參悟</button>
+        `;
+        cardEl.onclick = () => {
+          gameState.runPerks.push(card);
+          playSound('upgrade');
+          modal.classList.add('hidden');
+          proceedNextWave();
+        };
+        container.appendChild(cardEl);
+      });
+      modal.classList.remove('hidden');
+    }
+
+    function triggerGameOver() {
+      const modal = document.getElementById('modal-gameover');
+      if (document.getElementById('gameover-waves')) document.getElementById('gameover-waves').textContent = `第 ${gameState.currentWave} 波`;
+      if (document.getElementById('gameover-kills')) document.getElementById('gameover-kills').textContent = `${gameState.killsThisRun} 隻`;
+      if (document.getElementById('gameover-souls')) document.getElementById('gameover-souls').textContent = `+${Math.floor(gameState.killsThisRun * 0.3)} 🔮`;
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function restartRun() {
+      gameState.currentWave = 1;
+      gameState.gold = 150;
+      gameState.killsThisRun = 0;
+      gameState.killsMilestoneProgress = 0;
+      gameState.pendingMilestoneCards = 0;
+      gameState.frenzyTimer = 0;
+      gameState.runPerks = [];
+      enemies = []; projectiles = []; particles = []; damageTexts = [];
+      
+      const stats = getDerivedStats();
+      fortress.hp = stats.totalMaxHp; fortress.maxHp = stats.totalMaxHp;
+      if (document.getElementById('modal-gameover')) document.getElementById('modal-gameover').classList.add('hidden');
+      
+      proceedNextWave();
+      renderInRunTab();
+    }
+
+    function render() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, canvasW, canvasH);
+
+      // Grid
+      ctx.save();
+      ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvasW; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvasH); ctx.stroke(); }
+      for (let y = 0; y < canvasH; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvasW, y); ctx.stroke(); }
+      
+      // Bagua Rings
+      const timeSec = performance.now() / 1000;
+      ctx.translate(fortress.x, fortress.y);
+      ctx.rotate(timeSec * 0.15);
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
+      ctx.lineWidth = 1.5; ctx.setLineDash([8, 12]);
+      ctx.beginPath(); ctx.arc(0, 0, fortress.radius + 75, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.15)'; ctx.lineWidth = 2; ctx.setLineDash([4, 6]);
+      ctx.beginPath(); ctx.arc(fortress.x, fortress.y, fortress.radius + 28, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+
+      // Fortress Center
+      ctx.save();
+      const fortressGlow = ctx.createRadialGradient(fortress.x, fortress.y, 10, fortress.x, fortress.y, fortress.radius + 15);
+      fortressGlow.addColorStop(0, 'rgba(16, 185, 129, 0.8)'); fortressGlow.addColorStop(1, 'rgba(5, 150, 105, 0)');
+      ctx.fillStyle = fortressGlow;
+      ctx.beginPath(); ctx.arc(fortress.x, fortress.y, fortress.radius + 15, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = '#064e3b';
+      ctx.beginPath(); ctx.arc(fortress.x, fortress.y, fortress.radius, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#34d399'; ctx.lineWidth = 3; ctx.stroke();
+      ctx.fillStyle = '#ecfdf5'; ctx.font = '22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('☯️', fortress.x, fortress.y);
+      ctx.restore();
+
+      // Heroes
+      gameState.heroes.filter(h => h.unlocked).forEach(hero => {
+        if (!hero.x) return;
+        ctx.save();
+        ctx.fillStyle = hero.color; ctx.beginPath(); ctx.arc(hero.x, hero.y, 17, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.font = '15px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(hero.avatar, hero.x, hero.y + 1);
+        ctx.restore();
+      });
+
+      // Projectiles
+      projectiles.forEach(p => {
+        ctx.save(); ctx.fillStyle = p.color; ctx.shadowColor = p.color; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.isCrit ? 6 : 4, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      });
+
+      // Enemies
+      enemies.forEach(en => {
+        ctx.save(); ctx.fillStyle = en.color; ctx.shadowColor = en.color; ctx.shadowBlur = en.isBoss ? 16 : 6;
+        ctx.beginPath(); ctx.arc(en.x, en.y, en.radius, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = en.isBoss ? 2.5 : 1.5; ctx.stroke();
+        
+        const hpPercent = Math.max(0, en.hp / en.maxHp); const barW = en.radius * 2.2;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.7)'; ctx.fillRect(en.x - barW / 2, en.y - en.radius - 8, barW, 4);
+        ctx.fillStyle = en.isBoss ? '#f43f5e' : '#22c55e'; ctx.fillRect(en.x - barW / 2, en.y - en.radius - 8, barW * hpPercent, 4);
+        
+        ctx.fillStyle = '#ffffff'; ctx.font = `${en.isBoss ? 13 : 10}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText(en.name, en.x, en.y + (en.isBoss ? 4 : 3));
+        ctx.restore();
+      });
+
+      // Particles & Damage Text
+      particles.forEach(pt => { ctx.save(); ctx.globalAlpha = pt.life / 30; ctx.fillStyle = pt.color; ctx.fillRect(pt.x, pt.y, 3, 3); ctx.restore(); });
+      damageTexts.forEach(dt => { ctx.save(); ctx.globalAlpha = dt.life / 30; ctx.fillStyle = dt.color; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(dt.text, dt.x, dt.y); ctx.restore(); });
+    }
+
+    function renderInRunTab() {
+      const container = document.getElementById('inrun-upgrades-list');
+      if (!container) return; container.innerHTML = '';
+      const stats = getDerivedStats(); const discount = stats.relicBonus.costDiscount;
+      
+      const upgrades = [
+        { key: 'atk', name: '全軍破陣訣', icon: '🗡️', desc: `基礎傷害 +12% (+${Math.round(stats.runAtkBonus * 100)}%)` },
+        { key: 'spd', name: '九宮八卦步', icon: '⚡', desc: `攻擊速度 +8% (+${Math.round(stats.runSpdBonus * 100)}%)` },
+        { key: 'crit', name: '天目照妖鏡', icon: '🎯', desc: `暴擊機率 +2% (${(stats.runCritChance * 100).toFixed(1)}%)` },
+        { key: 'hp', name: '玄武金湯固', icon: '🛡️', desc: `陣眼生命 +65 (上限: ${stats.totalMaxHp})` },
+        { key: 'thorn', name: '太極乾坤反', icon: '🌀', desc: `結界反震 +15 (${stats.totalThorns})` },
+        { key: 'dmgRed', name: '金剛護體甲', icon: '🔰', desc: `結界減傷 +4% (當前: ${(stats.dmgReduction*100).toFixed(1)}%)` }
+      ];
+
+      upgrades.forEach(u => {
+        const item = gameState.runUpgrades[u.key];
+        const cost = Math.round(item.cost * (1 - discount));
+        const canAfford = gameState.gold >= cost;
+        const isMaxed = u.key === 'dmgRed' && item.lvl >= 18;
+
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between p-2 sm:p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80 hover:border-slate-700 transition";
+        row.innerHTML = `
+          <div class="flex items-center space-x-2 sm:space-x-2.5 min-w-0 flex-1">
+            <span class="text-xl sm:text-2xl shrink-0">${u.icon}</span>
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-slate-200 flex items-center gap-1.5 flex-wrap">
+                <span>${u.name}</span>
+                <span class="text-amber-400 font-mono text-[10px] sm:text-[11px]">Lv.${item.lvl}</span>
+                <span class="info-badge text-[9px] px-1.5 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-400 cursor-pointer">ℹ️ 詳情</span>
+              </div>
+              <div class="desc-text text-[10px] text-slate-400 truncate">${u.desc}</div>
+            </div>
+          </div>
+          <button class="shrink-0 ml-2 px-2.5 py-1.5 rounded-lg text-xs font-bold font-mono transition ${isMaxed ? 'bg-slate-800 text-slate-500' : (canAfford ? 'bg-amber-600 text-slate-900 shadow' : 'bg-slate-800 text-slate-500')}">
+            ${isMaxed ? '滿級' : `💰 ${cost}`}
+          </button>
+        `;
+
+        // Long press & badge click for mobile description
+        attachLongPress(row, u.name, u.desc);
+        const badge = row.querySelector('.info-badge');
+        if (badge) badge.onclick = (e) => { e.stopPropagation(); showInfoTooltip(u.name, u.desc); };
+
+        if (canAfford && !isMaxed) {
+          row.querySelector('button').onclick = (e) => {
+            e.stopPropagation();
+            initAudio(); gameState.gold -= cost; item.lvl++; item.cost = Math.floor(item.cost * 1.35);
+            playSound('upgrade'); renderInRunTab(); updateUI();
+          };
+        }
+        container.appendChild(row);
+      });
+    }
+
+    function renderHeroesTab() {
+      const container = document.getElementById('heroes-list');
+      if (!container) return; container.innerHTML = '';
+      gameState.heroes.forEach(hero => {
+        const isUnl = hero.unlocked; const cost = isUnl ? Math.round(hero.costUpgrade * Math.pow(1.35, hero.level - 1)) : hero.cost;
+        const canAfford = gameState.souls >= cost;
+        const card = document.createElement('div');
+        card.className = `p-2.5 sm:p-3 rounded-xl border transition flex flex-col justify-between ${isUnl ? 'bg-slate-950/80 border-slate-700' : 'bg-slate-950/40 border-slate-800 opacity-80'}`;
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0 flex-1">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-xl sm:text-2xl shadow shrink-0">${hero.avatar}</div>
+              <div class="min-w-0">
+                <div class="flex items-center space-x-1.5 flex-wrap">
+                  <span class="text-xs font-bold text-slate-100">${hero.name}</span>
+                  <span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">${hero.realm}</span>
+                  <span class="info-badge text-[9px] px-1 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-400 cursor-pointer">ℹ️ 詳情</span>
+                </div>
+                <div class="text-[10px] sm:text-[11px] text-amber-400 font-mono">${isUnl ? `Lv.${hero.level} · 攻擊 ${hero.baseDmg + (hero.level - 1) * hero.dmgPerLvl}` : `未召喚`}</div>
+              </div>
+            </div>
+            <button class="shrink-0 ml-2 px-2 py-1.5 rounded-lg text-xs font-bold font-mono transition ${canAfford ? (isUnl ? 'bg-indigo-600 text-white shadow' : 'bg-purple-600 text-white shadow') : 'bg-slate-800 text-slate-500'}">
+              🔮 ${cost} ${isUnl ? '升級' : '召喚'}
+            </button>
+          </div>
+          <div class="desc-text mt-1.5 sm:mt-2 text-[10px] text-slate-400 border-t border-slate-800/80 pt-1.5">${hero.desc}</div>
+        `;
+
+        attachLongPress(card, hero.name, hero.desc);
+        const badge = card.querySelector('.info-badge');
+        if (badge) badge.onclick = (e) => { e.stopPropagation(); showInfoTooltip(hero.name, hero.desc); };
+
+        if (canAfford) {
+          card.querySelector('button').onclick = (e) => {
+            e.stopPropagation();
+            initAudio(); gameState.souls -= cost; 
+            if (isUnl) hero.level++; else hero.unlocked = true;
+            playSound('upgrade'); renderHeroesTab(); updateUI();
+          };
+        }
+        container.appendChild(card);
+      });
+    }
+
+    function renderTalentsTab() {
+      const container = document.getElementById('talents-list');
+      if (!container) return; container.innerHTML = '';
+      gameState.talents.forEach(tal => {
+        const cost = Math.round(tal.costBase * Math.pow(tal.costMult, tal.level));
+        const isMax = tal.level >= tal.maxLvl; const canAfford = !isMax && gameState.souls >= cost;
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between p-2 sm:p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80";
+        row.innerHTML = `
+          <div class="flex items-center space-x-2 sm:space-x-2.5 min-w-0 flex-1">
+            <span class="text-xl sm:text-2xl shrink-0">${tal.icon}</span>
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-slate-200 flex items-center gap-1.5 flex-wrap">
+                <span>${tal.name}</span>
+                <span class="text-purple-400 font-mono text-[10px] sm:text-[11px]">Lv.${tal.level}/${tal.maxLvl}</span>
+                <span class="info-badge text-[9px] px-1 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-400 cursor-pointer">ℹ️ 詳情</span>
+              </div>
+              <div class="desc-text text-[10px] text-slate-400 truncate">${tal.desc}</div>
+            </div>
+          </div>
+          <button class="shrink-0 ml-2 px-2.5 py-1.5 rounded-lg text-xs font-bold font-mono transition ${isMax ? 'bg-slate-800 text-slate-500' : (canAfford ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-500')}">
+            ${isMax ? '圓滿' : `🔮 ${cost}`}
+          </button>
+        `;
+
+        attachLongPress(row, tal.name, tal.desc);
+        const badge = row.querySelector('.info-badge');
+        if (badge) badge.onclick = (e) => { e.stopPropagation(); showInfoTooltip(tal.name, tal.desc); };
+
+        if (canAfford) {
+          row.querySelector('button').onclick = (e) => {
+            e.stopPropagation();
+            initAudio(); gameState.souls -= cost; tal.level++;
+            playSound('upgrade'); renderTalentsTab(); updateUI();
+          };
+        }
+        container.appendChild(row);
+      });
+    }
+
+    function renderRelicsTab() {
+      const container = document.getElementById('relics-list');
+      if (!container) return; container.innerHTML = '';
+      gameState.relics.forEach(relic => {
+        const card = document.createElement('div');
+        card.className = `p-2.5 sm:p-3 rounded-xl border transition flex flex-col justify-between ${relic.owned ? 'bg-slate-950/80 border-amber-500/40 glow-gold' : 'bg-slate-950/30 border-slate-800/70 opacity-60'}`;
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-1 sm:mb-1.5">
+              <span class="text-xl sm:text-2xl">${relic.icon}</span>
+              <div class="flex items-center gap-1">
+                <span class="info-badge text-[9px] px-1 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-400 cursor-pointer">ℹ️ 詳情</span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded font-mono ${relic.owned ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800 text-slate-500'}">${relic.owned ? '已啟動' : '未解鎖'}</span>
+              </div>
+            </div>
+            <div class="text-xs font-bold text-slate-200">${relic.name}</div>
+            <div class="desc-text text-[10px] text-slate-400 leading-snug mt-1">${relic.desc}</div>
+          </div>
+        `;
+
+        attachLongPress(card, relic.name, relic.desc);
+        const badge = card.querySelector('.info-badge');
+        if (badge) badge.onclick = (e) => { e.stopPropagation(); showInfoTooltip(relic.name, relic.desc); };
+
+        container.appendChild(card);
+      });
+    }
+
+    function renderRebirthTab() {
+      const pStones = Math.max(0, Math.floor(Math.pow(gameState.highestWave / 10, 1.25)));
+      if (document.getElementById('rebirth-gain-preview')) document.getElementById('rebirth-gain-preview').textContent = `+${pStones}`;
+      if (document.getElementById('rebirth-current-stones')) document.getElementById('rebirth-current-stones').textContent = gameState.rebirthOrbs;
+
+      const container = document.getElementById('rebirth-perks-list');
+      if (!container) return; container.innerHTML = '';
+      gameState.rebirthPerks.forEach(perk => {
+        const cost = perk.cost * (perk.level + 1); const isMax = perk.level >= perk.max; const canAfford = !isMax && gameState.rebirthOrbs >= cost;
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between p-2 sm:p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80";
+        row.innerHTML = `
+          <div class="flex items-center space-x-2 sm:space-x-2.5 min-w-0 flex-1">
+            <span class="text-xl sm:text-2xl shrink-0">${perk.icon}</span>
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-slate-200 flex items-center gap-1.5 flex-wrap">
+                <span>${perk.name}</span>
+                <span class="text-cyan-400 text-[10px] sm:text-[11px]">Lv.${perk.level}/${perk.max}</span>
+                <span class="info-badge text-[9px] px-1 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-400 cursor-pointer">ℹ️ 詳情</span>
+              </div>
+              <div class="desc-text text-[10px] text-slate-400 truncate">${perk.desc}</div>
+            </div>
+          </div>
+          <button class="shrink-0 ml-2 px-2.5 py-1.5 rounded-lg text-xs font-bold font-mono transition ${isMax ? 'bg-slate-800 text-slate-500' : (canAfford ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-500')}">
+            ${isMax ? '圓滿' : `☸️ ${cost}`}
+          </button>
+        `;
+
+        attachLongPress(row, perk.name, perk.desc);
+        const badge = row.querySelector('.info-badge');
+        if (badge) badge.onclick = (e) => { e.stopPropagation(); showInfoTooltip(perk.name, perk.desc); };
+
+        if (canAfford) {
+          row.querySelector('button').onclick = (e) => {
+            e.stopPropagation();
+            initAudio(); gameState.rebirthOrbs -= cost; perk.level++;
+            playSound('upgrade'); renderRebirthTab(); updateUI();
+          };
+        }
+        container.appendChild(row);
+      });
+    }
+
+    function updateUI() {
+      if (document.getElementById('ui-gold')) document.getElementById('ui-gold').textContent = Math.floor(gameState.gold);
+      if (document.getElementById('ui-souls')) document.getElementById('ui-souls').textContent = Math.floor(gameState.souls);
+      if (document.getElementById('ui-rebirth-orbs')) document.getElementById('ui-rebirth-orbs').textContent = gameState.rebirthOrbs;
+      if (document.getElementById('tab-gold-count')) document.getElementById('tab-gold-count').textContent = Math.floor(gameState.gold);
+      if (document.getElementById('tab-souls-count')) document.getElementById('tab-souls-count').textContent = `${Math.floor(gameState.souls)} 🔮`;
+
+      if (document.getElementById('ui-kill-progress')) document.getElementById('ui-kill-progress').textContent = `(${gameState.killsMilestoneProgress || 0}/50)`;
+      const badge = document.getElementById('ui-milestone-badge');
+      if (badge) {
+        if ((gameState.pendingMilestoneCards || 0) > 0) { badge.classList.remove('hidden'); badge.textContent = gameState.pendingMilestoneCards; }
+        else badge.classList.add('hidden');
+      }
+
+      const hpPercent = Math.max(0, Math.min(100, (fortress.hp / fortress.maxHp) * 100));
+      if (document.getElementById('ui-hp-bar')) document.getElementById('ui-hp-bar').style.width = `${hpPercent}%`;
+      if (document.getElementById('ui-hp-text')) document.getElementById('ui-hp-text').textContent = `${Math.ceil(fortress.hp)}`;
+
+      if (document.getElementById('ui-wave-number')) document.getElementById('ui-wave-number').textContent = gameState.currentWave;
+      if (document.getElementById('ui-wave-count')) document.getElementById('ui-wave-count').textContent = `${waveState.totalWaveEnemies - waveState.enemiesLeftToSpawn} / ${waveState.totalWaveEnemies}`;
+      if (document.getElementById('ui-wave-progress-bar')) document.getElementById('ui-wave-progress-bar').style.width = `${((waveState.totalWaveEnemies - waveState.enemiesLeftToSpawn) / waveState.totalWaveEnemies) * 100}%`;
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const t = document.createElement('div');
+      t.className = "px-4 py-2 rounded-xl bg-slate-900/95 border border-slate-700 text-xs font-bold text-amber-300 shadow-2xl transition-all duration-300 transform translate-y-3 opacity-0 whitespace-nowrap max-w-[90vw] truncate";
+      t.textContent = msg;
+      container.appendChild(t);
+      requestAnimationFrame(() => t.classList.remove('translate-y-3', 'opacity-0'));
+      setTimeout(() => { t.classList.add('opacity-0', 'translate-y-3'); setTimeout(() => t.remove(), 350); }, 2400);
+    }
+
+    function setupEventListeners() {
+      // Start Screen Mode Selections
+      const startModal = document.getElementById('modal-start-screen');
+      const btnMobile = document.getElementById('btn-select-mobile');
+      const btnTablet = document.getElementById('btn-select-tablet');
+      const btnToggleLayout = document.getElementById('btn-toggle-layout');
+      const btnCloseTooltip = document.getElementById('btn-close-tooltip');
+      const tooltipModal = document.getElementById('modal-info-tooltip');
+
+      if (btnMobile) {
+        btnMobile.onclick = () => {
+          initAudio();
+          setDisplayMode(true);
+          startModal.classList.add('hidden');
+        };
+      }
+      if (btnTablet) {
+        btnTablet.onclick = () => {
+          initAudio();
+          setDisplayMode(false);
+          startModal.classList.add('hidden');
+        };
+      }
+      if (btnToggleLayout) {
+        btnToggleLayout.onclick = () => {
+          setDisplayMode(!isMobileMode);
+          showToast(`已切換為：${isMobileMode ? '手機直式' : '平板/電腦'} 模式`);
+        };
+      }
+      if (btnCloseTooltip && tooltipModal) {
+        btnCloseTooltip.onclick = () => tooltipModal.classList.add('hidden');
+        tooltipModal.onclick = (e) => {
+          if (e.target === tooltipModal) tooltipModal.classList.add('hidden');
+        };
+      }
+
+      if (document.getElementById('btn-audio')) document.getElementById('btn-audio').onclick = (e) => {
+        initAudio(); gameState.soundEnabled = !gameState.soundEnabled;
+        e.currentTarget.textContent = gameState.soundEnabled ? '🔊' : '🔇';
+      };
+
+      if (document.getElementById('btn-claim-milestone')) document.getElementById('btn-claim-milestone').onclick = () => { initAudio(); openMilestoneRewardModal(); };
+
+      // Game Speed 1x -> 3x -> 5x toggle
+      if (document.getElementById('btn-game-speed')) document.getElementById('btn-game-speed').onclick = () => {
+        initAudio();
+        if (gameState.gameSpeed === 1) gameState.gameSpeed = 3;
+        else if (gameState.gameSpeed === 3) gameState.gameSpeed = 5;
+        else gameState.gameSpeed = 1;
+        if (document.getElementById('ui-speed-label')) document.getElementById('ui-speed-label').textContent = `${gameState.gameSpeed}.0x`;
+        showToast(`遊戲速度調整為: ${gameState.gameSpeed}x`);
+      };
+
+      if (document.getElementById('btn-auto-wave')) document.getElementById('btn-auto-wave').onclick = () => {
+        initAudio(); gameState.autoWave = !gameState.autoWave;
+        if (document.getElementById('ui-auto-label')) document.getElementById('ui-auto-label').textContent = gameState.autoWave ? '開啟' : '暫停';
+      };
+
+      if (document.getElementById('btn-trigger-rebirth')) document.getElementById('btn-trigger-rebirth').onclick = () => {
+        initAudio(); const gainedStones = Math.max(0, Math.floor(Math.pow(gameState.highestWave / 10, 1.25)));
+        if (gainedStones <= 0) { showToast('波次過低，無法凝聚玄石！'); return; }
+        gameState.rebirthOrbs += gainedStones; showToast(`☸️ 涅槃飛升！獲得 ${gainedStones} 顆玄石！`);
+        restartRun(); renderRebirthTab();
+      };
+
+      if (document.getElementById('btn-gameover-restart')) document.getElementById('btn-gameover-restart').onclick = () => { initAudio(); restartRun(); };
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          initAudio();
+          document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('active', 'bg-slate-800', 'text-amber-300', 'border-amber-500');
+            b.classList.add('text-slate-400', 'border-transparent');
+          });
+          btn.classList.add('active', 'bg-slate-800', 'text-amber-300', 'border-amber-500');
+          btn.classList.remove('text-slate-400', 'border-transparent');
+          
+          document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+          const target = btn.dataset.tab;
+          if (document.getElementById(target)) document.getElementById(target).classList.remove('hidden');
+
+          if (target === 'tab-inrun') renderInRunTab();
+          else if (target === 'tab-heroes') renderHeroesTab();
+          else if (target === 'tab-talents') renderTalentsTab();
+          else if (target === 'tab-relics') renderRelicsTab();
+          else if (target === 'tab-rebirth') renderRebirthTab();
+        });
+      });
+
+      canvas.addEventListener('pointerdown', (e) => {
+        initAudio();
+        const rect = canvas.getBoundingClientRect();
+        particles.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, vx: 0, vy: 0, color: '#38bdf8', life: 15 });
+      });
+
+      window.addEventListener('resize', resizeCanvas);
+    }
+
+    function resizeCanvas() {
+      const container = document.getElementById('canvas-container');
+      if (!container || !canvas) return;
+      canvasW = container.clientWidth; canvasH = container.clientHeight;
+      canvas.width = canvasW; canvas.height = canvasH;
+      fortress.x = canvasW / 2; fortress.y = canvasH / 2;
+    }
+
+    window.onload = function () {
+      canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
+      // Auto-detect mobile device on initial load
+      const isMobileDevice = window.innerWidth <= 768;
+      setDisplayMode(isMobileDevice);
+
+      resizeCanvas(); setupEventListeners();
+      renderInRunTab(); renderHeroesTab(); renderTalentsTab(); renderRelicsTab(); renderRebirthTab();
+      proceedNextWave();
+      requestAnimationFrame(gameLoop);
+    };
+  </script>
+</body>
+</html>
